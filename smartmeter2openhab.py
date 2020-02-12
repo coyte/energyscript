@@ -1,5 +1,5 @@
-progname = "UH50.py"
-version = "UH50 v0.30"
+progname = "smartmeter2openhab.py"
+version = "v0.01"
 import sys
 import serial
 import datetime
@@ -8,16 +8,23 @@ import locale
 from time import sleep
 import argparse
 import serial.tools.list_ports
+from urllib import request, parse
+#import random
 
+ecomport = "/dev/ttyUSB10"
+hcomport = "/dev/ttyUSB20"
+ohsrv    = "192.168.15.11"
+ohport   = "8081"
 
-
+"""
 def scan_serial():
 #  scan for available ports. return a list of tuples (name, description)
     available = []
     for i in serial.tools.list_ports.comports():
         available.append((i[0], i[1]))
     return available
-    
+"""
+"""    
 ################
 #Error display #
 ################
@@ -27,7 +34,9 @@ def show_error():
     print("Fout type: %s" % ft )
     print("Fout waarde: %s" % fv )
     return
+"""
 
+"""
 ################
 #Scherm output #
 ################
@@ -41,12 +50,21 @@ def print_heat_telegram():
     print (" 6.31 - Meterstand Gebruiksduur: %0.3f %s" % (heat_meterreading_hours, heat_unitmeterreading_hours) )    
     print ("Einde UH50 telegram" )
     return        
-
+"""
+def postUdpate(item, value):
+    #print ("http://"+args.server+":"+args.port+"/rest/items/"+item+"/state")
+    #print (str(value).encode('utf-8'))
+    req =  request.Request("http://"+args.server+":"+args.port+"/rest/items/"+item+"/state", data=str(value).encode('utf-8'))
+    req.add_header('Content-Type', 'text/plain')
+    req.get_method = lambda: 'PUT'
+    resp = request.urlopen(req)
+    #if resp.status!=202 :
+    #    print("Response was %s %s" % (resp.status, resp.reason))
 
 ################################################################################################################################################
 #Main program
 ################################################################################################################################################
-print ("Landis & Gyr IR Datalogger %s" % version)
+#print ("Landis & Gyr IR Datalogger %s" % version)
 equipment_prefix = "UH50"
 comport=0
 output_mode="scherm"
@@ -62,15 +80,12 @@ print ("Control-C om af te breken")
 ################################################################################################################################################
 #Commandline arguments parsing
 ################################################################################################################################################    
-parser = argparse.ArgumentParser(prog=progname, description='UH50 Datalogger - www.smartmeterdashboard.nl', epilog="Copyright (c) 2013-2016 J. van der Linde. Although there is a explicit copyright on this sourcecode, anyone may use it freely under a 'Creative Commons Naamsvermelding-NietCommercieel-GeenAfgeleideWerken 3.0 Nederland' license.")
+parser = argparse.ArgumentParser(prog=progname, description='energylogger', epilog="Copyright (c) 2020 Niels Teekens")
 parser.add_argument("-c", "--comport", help="COM-port name (COMx or /dev/...) that identifies the port your IR-head is connected to")
-
-parser.add_argument("-o", "--output", help="Output mode, default='screen'", default='screen', choices=['screen', 'csv', 'mysql', 'sqlite'])
-
-parser.add_argument("-s", "--server", help="MySQL server, default='localhost'", default='localhost')
-parser.add_argument("-u", "--user", help="MySQL user, default='root'", default='root')
-parser.add_argument("-p", "--password", help="MySQL user password, default='password'", default='password')
-parser.add_argument("-d", "--database", help="MySQL database name, default=p1'", default='p1')
+parser.add_argument("-o", "--output", help="Output mode, default='screen'", default='screen', choices=['screen', 'silent'])
+parser.add_argument("-s", "--server", help="openhab server")
+parser.add_argument("-p", "--port", help="OpenHAB server port")
+#parser.add_argument("-t", "--testing", help="Use dummy data, do not read from IR head')
 args = parser.parse_args()
 
 if args.comport == None:
@@ -92,7 +107,9 @@ output_mode = args.output
 #Show startup arguments
 print ("\r")
 print ("Startup parameters:")
-print ("Output mode             : %s" % output_mode)
+print ("Output mode        : %s" % args.output)
+print ("OpenHAB server     : %s" % args.server)
+print ("OpenHAB port       : %s" % args.port)
 
 #################################################################################################################################################
 
@@ -105,8 +122,8 @@ ser.stopbits=serial.STOPBITS_TWO
 ser.xonxoff=0
 ser.rtscts=0
 ser.timeout=20
-ser.port=str(comport)
-print ("COM-port                : %s" % comport )
+ser.port=str(args.comport)
+print ("COM-port           : %s" % args.comport )
 
 
 
@@ -180,11 +197,12 @@ heat_data = ir_lines
 num_elements = len(ir_lines)
 #print("Number of elements: %d"% num_elements)
 #parse all heat_data elements
+
 i=0
 while i<num_elements:
-    print("Elements index: %d"% i)
+    #print("Elements index: %d"% i)
     heat_element = heat_data[i]
-    print(heat_element)
+    #print(heat_element)
     
     if heat_element.find("0.0(")!=-1:
     #heat_equipment_id 
@@ -224,11 +242,14 @@ while i<num_elements:
         heat_unitmeterreading_hours = heat_element[heat_num_start:heat_num_end]
      
     i+=1
+
 #################################################################
 # Output based on startup parameter 'output_mode'               #
 #################################################################   
+#heat_meterreading_energy = random.randint(100000,2000000)
 #Output to scherm
-if output_mode=="screen": print_heat_telegram()
+#if output_mode=="screen": print_heat_telegram()
+postUdpate("test", heat_meterreading_energy)
 
 
 
