@@ -29,7 +29,7 @@ def postUpdate(item, value):
 ################################################################################################################################################
 #Main program
 ################################################################################################################################################
-syslog.syslog('Started in ' + sys.argv[1] + ' mode')
+syslog.syslog('Started')
 if debug: print('Debug ON')
 if debug: print("Python version %s.%s.%s" % sys.version_info[:3])
 if debug: print("pySerial version %s" % serial.VERSION)
