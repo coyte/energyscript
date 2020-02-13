@@ -5,114 +5,49 @@ import serial
 import datetime
 import os
 import locale
+import syslog
 from time import sleep
-import argparse
-import serial.tools.list_ports
 from urllib import request, parse
-#import random
 
+
+debug    = 0
 ecomport = "/dev/ttyUSB10"
 hcomport = "/dev/ttyUSB20"
-ohsrv    = "192.168.15.11"
-ohport   = "8081"
+opehabsrv    = "192.168.15.11"
+openhabport   = "8081"
 
-"""
-def scan_serial():
-#  scan for available ports. return a list of tuples (name, description)
-    available = []
-    for i in serial.tools.list_ports.comports():
-        available.append((i[0], i[1]))
-    return available
-"""
-"""    
-################
-#Error display #
-################
-def show_error():
-    ft = sys.exc_info()[0]
-    fv = sys.exc_info()[1]
-    print("Fout type: %s" % ft )
-    print("Fout waarde: %s" % fv )
-    return
-"""
-
-"""
-################
-#Scherm output #
-################
-def print_heat_telegram():
-    print ("---------------------------------------------------------------------------------------")
-    print ("Landis & Gyr UH50 telegram ontvangen op: %s" % heat_timestamp)
-    print ("Meter fabrikant/type: Landis & Gyr Ultraheat 50")
-    print (" 0. 0 - Meter identificatie: %s" % heat_equipment_id )
-    print (" 6. 8 - Meterstand Energie: %0.3f %s" % (heat_meterreading_energy, heat_unitmeterreading_energy) )
-    print (" 6.26 - Meterstand Volume: %0.3f %s" % (heat_meterreading_volume, heat_unitmeterreading_volume) )
-    print (" 6.31 - Meterstand Gebruiksduur: %0.3f %s" % (heat_meterreading_hours, heat_unitmeterreading_hours) )    
-    print ("Einde UH50 telegram" )
-    return        
-"""
-def postUdpate(item, value):
-    #print ("http://"+args.server+":"+args.port+"/rest/items/"+item+"/state")
-    #print (str(value).encode('utf-8'))
-    req =  request.Request("http://"+args.server+":"+args.port+"/rest/items/"+item+"/state", data=str(value).encode('utf-8'))
+################################################################################################################################################
+#postUpdate -- Calls OpenHAB API to update the value of item
+################################################################################################################################################
+def postUpdate(item, value):
+    req = request.Request("http://"+opehabsrv+":"+openhabport+"/rest/items/"+item+"/state", data=str(value).encode('utf-8'))
     req.add_header('Content-Type', 'text/plain')
     req.get_method = lambda: 'PUT'
     resp = request.urlopen(req)
-    #if resp.status!=202 :
-    #    print("Response was %s %s" % (resp.status, resp.reason))
+    if resp.status!=202 :
+        if debug: print("Response was %s %s" % (resp.status, resp.reason))
 
 ################################################################################################################################################
 #Main program
 ################################################################################################################################################
-#print ("Landis & Gyr IR Datalogger %s" % version)
-equipment_prefix = "UH50"
-comport=0
-output_mode="scherm"
-win_os = (os.name == 'nt')
-if win_os:
-    print("Windows Mode")
-else:
-    print("Non-Windows Mode")
-print("Python versie %s.%s.%s" % sys.version_info[:3])
-print("pySerial version %s" % serial.VERSION)
-print ("Control-C om af te breken")
+syslog.syslog('Started in ' + sys.argv[1] + ' mode')
+if debug: print('Debug ON')
+if debug: print("Python version %s.%s.%s" % sys.version_info[:3])
+if debug: print("pySerial version %s" % serial.VERSION)
 
 ################################################################################################################################################
-#Commandline arguments parsing
+#Commandline arguments parsing. -h=heat meter UH50/2WR5, -e=electricity meter
 ################################################################################################################################################    
-parser = argparse.ArgumentParser(prog=progname, description='energylogger', epilog="Copyright (c) 2020 Niels Teekens")
-parser.add_argument("-c", "--comport", help="COM-port name (COMx or /dev/...) that identifies the port your IR-head is connected to")
-parser.add_argument("-o", "--output", help="Output mode, default='screen'", default='screen', choices=['screen', 'silent'])
-parser.add_argument("-s", "--server", help="openhab server")
-parser.add_argument("-p", "--port", help="OpenHAB server port")
-#parser.add_argument("-t", "--testing", help="Use dummy data, do not read from IR head')
-args = parser.parse_args()
-
-if args.comport == None:
-    parser.print_help()
-    print ("\r")
-    print("%s: error: The following arguments are required: -c/--comport." % progname)
-    if win_os:
-        print("Available ports for argument -c/--comport:") 
-        for n,s in scan_serial():
-            print ( n, " - ", s )
-    else:
-        print("Allowed values for argument -c/--comport: Any '/dev/....' string that identifies the port your P1CC is connected to.") 
-    print ("Program aborted.")
-    sys.exit()
-comport = args.comport
-  
-output_mode = args.output
+if sys.argv[1] == "-h" : comport=hcomport
+if sys.argv[1] == "-e" : comport=ecomport
 
 #Show startup arguments
-print ("\r")
-print ("Startup parameters:")
-print ("Output mode        : %s" % args.output)
-print ("OpenHAB server     : %s" % args.server)
-print ("OpenHAB port       : %s" % args.port)
+if debug: print ("\r")
+if debug: print ("Startup parameters:")
+if debug: print ("Operation: %s" % sys.argv[1])
+if debug: print ("COM-port : %s" % comport )
 
 #################################################################################################################################################
-
 #Set COM port config
 ser = serial.Serial()
 ser.baudrate = 300
@@ -122,11 +57,9 @@ ser.stopbits=serial.STOPBITS_TWO
 ser.xonxoff=0
 ser.rtscts=0
 ser.timeout=20
-ser.port=str(args.comport)
-print ("COM-port           : %s" % args.comport )
+ser.port=str(comport)
 
-
-
+#sys.exit()
 #################################################################
 # COM port reading                                              #
 #################################################################    
@@ -134,8 +67,9 @@ print ("COM-port           : %s" % args.comport )
 try:
     ser.open()
 except:
-    sys.exit ("Fout bij het openen van %s. Programma afgebroken."  % comport)
-print ("Activatie poort.")
+    syslog.syslog('Error opening comport ' + comport)
+    sys.exit ("Error opening port %s. Script aborted."  % comport)
+if debug: print ("Opened com port.")
 # Wake up
 ser.setRTS(False)
 ser.setDTR(False)
@@ -146,7 +80,7 @@ ir_command=("\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x0
 ser.write(ir_command.encode('utf-8')) 
 sleep(1.5)
 #Initialize
-print ("Initialisatie op 300 baud")
+if debug: print ("Initialisation on 300 baud")
 ir_command='/?!\x0D\x0A'
 ser.write(ir_command.encode('utf-8'))
 ser.flush()
@@ -158,7 +92,7 @@ while '/LUGC2WR5\r\n' not in ir_buffer:
         ir_buffer = str(ser.readline(), "utf-8")
 ir_lines = ir_buffer.strip().split('\r\n')
 
-print ("Gegevensuitwisseling op 2400 baud")
+if debug: print ("Data exchange on 2400 baud")
 #Set to 2400baud
 ser.baudrate = 2400
 
@@ -176,81 +110,32 @@ while not ETX:
     #Strip the ETX character
     ir_buffer = ir_buffer.replace('\x03','')
     ir_lines.extend(ir_buffer.strip().split('\r\n'))
-print ("Gegevensuitwisseling voltooid")
+if debug: print ("Data transfer completed")
     #Close port and show status
 try:
     ser.close()
 except:
-    if win_os:
-        sys.exit ("Fout bij het sluiten van %s. Programma afgebroken."  % ser.name)
-    else:
-        sys.exit ("Fout bij het sluiten van %s. Programma afgebroken."  %  port)  
+    syslog.syslog('Error closing comport: ' + ser.port)
+    sys.exit ("Error closing %s. Script aborted."  %  ser.port)  
 
 #################################################################
 # Process data                                                  #
-#################################################################           
-#print ("Number of received elements: %d" % len(ir_lines))
-#print ("Array of received elements: %s" % ir_lines)
-
-heat_timestamp=datetime.datetime.strftime(datetime.datetime.today(), "%Y-%m-%d %H:%M:%S" )
+# Get data from second item in list                             #
+################################################################# 
 heat_data = ir_lines
-num_elements = len(ir_lines)
-#print("Number of elements: %d"% num_elements)
-#parse all heat_data elements
-
-i=0
-while i<num_elements:
-    #print("Elements index: %d"% i)
-    heat_element = heat_data[i]
-    #print(heat_element)
-    
-    if heat_element.find("0.0(")!=-1:
-    #heat_equipment_id 
-    #0.0(11 digits C/N)
-        heat_num_start=heat_element.find("0.0(")+4
-        heat_num_end=heat_element.find(")",heat_num_start)
-        heat_equipment_id = equipment_prefix + "_" + heat_element[heat_num_start:heat_num_end]
-
-    if heat_element.find("6.8(")!=-1:
-    #heat_meterreading_energy, heat_unitmeterreading_energy
-    #6.8(Energy * unit)
-        heat_num_start = heat_element.find("6.8(") +4
-        heat_num_end=heat_element.find("*",heat_num_start)
-        heat_meterreading_energy = float(heat_element[heat_num_start:heat_num_end])
-        heat_num_start = heat_num_end+1
-        heat_num_end=heat_element.find(")",heat_num_start)
-        heat_unitmeterreading_energy = heat_element[heat_num_start:heat_num_end]
-
-    if heat_element.find("6.26(")!=-1:
-    #heat_meterreading_volume, heat_unitmeterreading_volume
-    #6.26(Volume * m3)
-        heat_num_start = heat_element.find("6.26(") +5
-        heat_num_end=heat_element.find("*",heat_num_start)
-        heat_meterreading_volume = float(heat_element[heat_num_start:heat_num_end])
-        heat_num_start = heat_num_end+1
-        heat_num_end=heat_element.find(")",heat_num_start)
-        heat_unitmeterreading_volume = heat_element[heat_num_start:heat_num_end]
-
-    if heat_element.find("6.31(")!=-1:
-    #heat_meterreading_hours, heat_unitmeterreading_hours
-    #6.31(Hours * h)
-        heat_num_start = heat_element.find("6.31(") +5
-        heat_num_end=heat_element.find("*",heat_num_start)
-        heat_meterreading_hours = float(heat_element[heat_num_start:heat_num_end])
-        heat_num_start = heat_num_end+1
-        heat_num_end=heat_element.find(")",heat_num_start)
-        heat_unitmeterreading_hours = heat_element[heat_num_start:heat_num_end]
-     
-    i+=1
+if debug: print("Raw Telegram data")
+if debug: print(heat_data)
+heat_meterreading_energy = float(heat_data[1][heat_data[1].find("6.8(") +4:heat_data[1].find("*",heat_data[1].find("6.8(") +4)])
+if debug : print("energy: " + str(heat_meterreading_energy))
+heat_meterreading_volume = float(heat_data[1][heat_data[1].find("6.26(") +5:heat_data[1].find("*",heat_data[1].find("6.26(") +5)])
+if debug : print("volume: " + str(heat_meterreading_volume))
 
 #################################################################
-# Output based on startup parameter 'output_mode'               #
+# Post data to openhab                                          #
 #################################################################   
-#heat_meterreading_energy = random.randint(100000,2000000)
-#Output to scherm
-#if output_mode=="screen": print_heat_telegram()
-postUdpate("test", heat_meterreading_energy)
-
+postUpdate("heat_energy", heat_meterreading_energy)
+postUpdate("heat_volume", heat_meterreading_volume)
+syslog.syslog('Completed succesfully')
 
 
 
