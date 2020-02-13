@@ -1,4 +1,4 @@
-progname = "smartmeter2openhab.py"
+progname = "heat2openhab.py"
 version = "v0.01"
 import sys
 import serial
@@ -11,8 +11,7 @@ from urllib import request, parse
 
 
 debug    = 0
-ecomport = "/dev/ttyUSB10"
-hcomport = "/dev/ttyUSB20"
+comport = "/dev/ttyUSB20"
 opehabsrv    = "192.168.15.11"
 openhabport   = "8081"
 
@@ -35,17 +34,9 @@ if debug: print('Debug ON')
 if debug: print("Python version %s.%s.%s" % sys.version_info[:3])
 if debug: print("pySerial version %s" % serial.VERSION)
 
-################################################################################################################################################
-#Commandline arguments parsing. -h=heat meter UH50/2WR5, -e=electricity meter
-################################################################################################################################################    
-if sys.argv[1] == "-h" : comport=hcomport
-if sys.argv[1] == "-e" : comport=ecomport
-
-#Show startup arguments
+#Show startup setting
 if debug: print ("\r")
-if debug: print ("Startup parameters:")
-if debug: print ("Operation: %s" % sys.argv[1])
-if debug: print ("COM-port : %s" % comport )
+if debug: print ("COM port : %s" % comport )
 
 #################################################################################################################################################
 #Set COM port config
