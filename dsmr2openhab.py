@@ -5,7 +5,7 @@ import serial
 import syslog
 from urllib import request, parse
 
-debug = 1
+debug = 0
 comport = "/dev/ttyUSB10"
 opehabsrv    = "192.168.15.11"
 openhabport   = "8081"
@@ -84,17 +84,22 @@ try:
 except:
     sys.exit ("Cannot close serial port %s. Aborting" % ser.name )   
 
-consumption=round(t1consumption+t2consumption,3)
-production=round(t1production+t2production,3)
+consumption=round(t1consumption+t2consumption,2)
+production=round(t1production+t2production,2)
+actprod=actprod*1000
+actcons=actcons*1000
 
 if debug: print("t1consumption:      " + str(t1consumption))
 if debug: print("t2consumption:      " + str(t2consumption))
-if debug: print("consumption:        " + str(consumption))
 if debug: print("t1production:       " + str(t1production))
 if debug: print("t2production:       " + str(t2production))
+if debug: print("consumption:        " + str(consumption))
 if debug: print("production:         " + str(production))
 if debug: print("actual consumption: " + str(actcons))
 if debug: print("actual production:  " + str(actprod))
 
-
-
+postUpdate("ElectricityMeter_ElectriciteitVerbruik", consumption)
+postUpdate("ElectricityMeter_ElectriciteitProductie", production)
+postUpdate("ElectricityMeter_ElectriciteitHuidigVerbruik", actcons)
+postUpdate("ElectricityMeter_ElectriciteitHuidigeProductie", actprod)
+syslog.syslog('Completed succesfully')
