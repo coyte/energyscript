@@ -10,10 +10,10 @@ from time import sleep
 from urllib import request, parse
 
 
-debug    = 0
-comport = "/dev/ttyUSB20"
-opehabsrv    = "192.168.15.11"
-openhabport   = "8081"
+debug        = 0
+comport      = "/dev/serial/by-id/usb-Silicon_Labs_CP2104_USB_to_UART_Bridge_Controller_00799BA6-if00-port0"
+opehabsrv   = "ip-address-openhab-server"
+openhabport = "port-of-openhab-server"
 
 ################################################################################################################################################
 #postUpdate -- Calls OpenHAB API to update the value of item

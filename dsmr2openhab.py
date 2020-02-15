@@ -5,10 +5,10 @@ import serial
 import syslog
 from urllib import request, parse
 
-debug = 0
-comport = "/dev/ttyUSB10"
-opehabsrv    = "192.168.15.11"
-openhabport   = "8081"
+debug       = 0
+comport     = "/dev/serial/by-id/usb-FTDI_P1_Converter_Cable_P1XZ6U1M-if00-port0"
+opehabsrv   = "ip-address-openhab-server"
+openhabport = "port-of-openhab-server"
 
 ################################################################################################################################################
 #postUpdate -- Calls OpenHAB API to update the value of item
