@@ -1,8 +1,8 @@
 # energyscript
 Scripts read heating and electricity meter and publish the result to Openhab items through API call.
-The two scripts basically read the telegram for the meter and by ID get the reuired data, which then formatted and send to OpenHAB.
+The two scripts basically read the telegram for the meter and use identifiers to get the required data, which is then formatted and send to OpenHAB.
 
-The heat2openmap script deals with a UH50 / 2WR5 heating meter from Landis & Gyr as used by Dutch provider Eneco. To connect to the meter a Volkszahler IR head is used.
+The heat2openhab script deals with a UH50 / 2WR5 heating meter from Landis & Gyr as used by Dutch provider Eneco. To connect to the meter a Volkszahler IR head is used.
 The dsmr2openhab script read a DSMR5 (but should be backwards compatible). It reads and consolidates the tariff1 and tariff2 reading into a single variable which is updated to OpenHAB.
 
 The scripts content is stolen and borrowed from a number of examples I found. I adapted and extended them to suit my needs.
