@@ -7,8 +7,8 @@ from urllib import request, parse
 
 debug       = 0
 comport     = "/dev/serial/by-id/usb-FTDI_P1_Converter_Cable_P1XZ6U1M-if00-port0"
-opehabsrv   = "ip-address-openhab-server"
-openhabport = "port-of-openhab-server"
+opehabsrv   = "cntr.teekens.info"
+openhabport = "7081"
 
 ################################################################################################################################################
 #postUpdate -- Calls OpenHAB API to update the value of item

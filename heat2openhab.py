@@ -12,8 +12,8 @@ from urllib import request, parse
 
 debug        = 0
 comport      = "/dev/serial/by-id/usb-Silicon_Labs_CP2104_USB_to_UART_Bridge_Controller_00799BA6-if00-port0"
-opehabsrv   = "ip-address-openhab-server"
-openhabport = "port-of-openhab-server"
+opehabsrv   = "cntr.teekens.infO"
+openhabport = "7081"
 
 ################################################################################################################################################
 #postUpdate -- Calls OpenHAB API to update the value of item
