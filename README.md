@@ -1,4 +1,9 @@
 # energyscript
+Update:
+I'm moving off Openhab. The scripts are slowly converted to MQTT as a target, as to have a more generic use for them.
+
+
+
 Scripts read heating and electricity meter and publish the result to Openhab items through API call.
 The two scripts basically read the telegram for the meter and use identifiers to get the required data, which is then formatted and send to OpenHAB.
 
