@@ -2,6 +2,9 @@
 Update:
 I'm moving off Openhab. The scripts are slowly converted to MQTT as a target, as to have a more generic use for them.
 
+Update2:
+The heat meter got replaced by a new smart one, well kinda. It's a Kamstrup 403 with m-bus that runs into a proprietary little communication box from my supplier. A bit of hacking required to get reading going again.
+
 
 
 Scripts read heating and electricity meter and publish the result to Openhab items through API call.
