@@ -1,21 +1,16 @@
-#!/usr/bin/env python
-# Python script om P1 telegram weer te geven
+#!/usr/bin/env python3
+# Python script om P1 telegram weer te geven in MQTT
+# paho needs to be installed (pip3 install paho-mqtt)
+# user needs to be member of dialout group (usermod -a -G dialout LOGINNAME)
 
-import datetime
-import re
 import serial
 import paho.mqtt.client as paho
-import sys
 import time
-
-#from urllib import request
-#import parse
 import syslog
-#import sys
+import os
 
 progname = "dsmr2mqtt.py"
 version = "v0.01"
-
 
 def on_publish(client, userdata, result):  # create function for callback
     print("data published \n")
@@ -24,12 +19,11 @@ def on_publish(client, userdata, result):  # create function for callback
 
 debug = 0
 comport = "/dev/serial/by-id/usb-FTDI_P1_Converter_Cable_P1XZ6U1M-if00-port0"
-mqttbroker = "cntr.teekens.info"
-mqttport = 1883
+
 
 client = paho.Client()
 client.on_publish = on_publish
-client.connect(mqttbroker, mqttport)
+client.connect(os.environ.get('MQTTBROKER'), int(os.environ.get('MQTTPORT')))
 
 
 ##############################################################################
