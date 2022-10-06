@@ -1,8 +1,9 @@
 #!/usr/bin/python
-"""
-Omnik2mqtt program.
-Get data from an omniksol inverter with 602xxxxx - 606xxxx ans save the data in a database or push to pvoutput.org.
-"""
+# Python script om Omnik inverter data weer te geven in MQTT
+# paho needs to be installed (pip3 install paho-mqtt)
+# MQTTBROKER, MQTTPORT, INVERTER1...INVERTERx need to be defined in env (see environment.sh)
+
+
 
 import socket
 import sys
@@ -14,10 +15,10 @@ import struct
 progname = "omnik2mqtt.py"
 version = "v0.01"
 
-mqttbroker = "cntr.teekens.info"
-mqttport = "1883"
 debug = 0
-inverter = [("10.0.4.28", 1602031687), ("10.0.4.27", 1602372469)]
+# add all your inverters below, script will cycle through them and add retrieved values
+inverter = [(os.environ.get('INVERTER1')), (os.environ.get('INVERTER2'))]
+
 port = 8899  # default port for inverter
 
 
@@ -28,7 +29,7 @@ def on_publish(client, userdata, result):  # create function for callback
 
 client = paho.Client()
 client.on_publish = on_publish
-client.connect(mqttbroker, mqttport)
+client.connect(os.environ.get('MQTTBROKER'), int(os.environ.get('MQTTPORT')))
 
 # ==========================================================================
 

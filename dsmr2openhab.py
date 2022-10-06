@@ -1,14 +1,19 @@
+#!/usr/bin/env python
+# Python script om P1 telegram weer te geven in OpenHAB
+# OPENHABSERVER en OPENHABPORT moeten in env gedefinieerd zijn
+
 progname = "dsmr2openhab.py"
 version = "v0.01"
 import sys
 import serial
 import syslog
+import os
 from urllib import request, parse
 
 debug       = 0
 comport     = "/dev/serial/by-id/usb-FTDI_P1_Converter_Cable_P1XZ6U1M-if00-port0"
-opehabsrv   = "cntr.teekens.info"
-openhabport = "7081"
+opehabsrv   = os.environ.get('OPENHABSERVER')
+openhabport = os.environ.get('OPENHABPORT')
 
 ################################################################################################################################################
 #postUpdate -- Calls OpenHAB API to update the value of item
