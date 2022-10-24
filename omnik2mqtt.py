@@ -11,6 +11,7 @@ import syslog
 import time
 import paho.mqtt.client as paho
 import struct
+import os
 
 progname = "omnik2mqtt.py"
 version = "v0.01"
