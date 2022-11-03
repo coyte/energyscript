@@ -16,9 +16,11 @@ import os
 progname = "omnik2mqtt.py"
 version = "v0.01"
 
-debug = 0
+debug = 1
 # add all your inverters below, script will cycle through them and add retrieved values
 inverter = [(os.environ.get('INVERTER1')), (os.environ.get('INVERTER2'))]
+if debug:
+    print(inverter)
 
 port = 8899  # default port for inverter
 
@@ -255,7 +257,7 @@ def generate_string(serial_no):
 power = 0
 e_total = 0
 e_today = 0
-
+exit(0)
 # Loop over inverters
 for tup in inverter:
     #    print(tup)
@@ -290,8 +292,9 @@ print("Yield today: " + str(e_today))
 
 
 # Post update to MQTT
-client.publish("solar/actual", power)
-client.publish("solar/total", e_total)
-client.publish("solar/today", e_today)
-time.sleep(1)
+#client.publish("homeassistant/binary_sensor/pv/config", '{"name": "pv", "device_class": "sensor", "state_topic": "homeassistant/binary_sensor/pv/state"}')
+#client.publish("homeassistant/binary_sensor/pv/actual", power)
+#client.publish("homeassistant/binary_sensor/pv/total", e_total)
+#client.publish("homeassistant/binary_sensor/pv/today", e_today)
+#time.sleep(1)
 syslog.syslog('Completed succesfully')

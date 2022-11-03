@@ -8,6 +8,7 @@ import paho.mqtt.client as paho
 import time
 import syslog
 import os
+import json
 
 progname = "dsmr2mqtt.py"
 version = "v0.01"
@@ -119,8 +120,51 @@ if debug:
 ######################################
 if debug:
     print("Publishing....")
-client.publish("dsmr/actual", actprod-actcons)
-client.publish("dsmr/cons", consumption)
-client.publish("dsmr/prod", production)
+
+topic = "homeassistant/sensor/dsmr/actual/config"
+payload = { "name":"actual",
+            "unique_id":"actual",
+            "state_topic": "homeassistant/sensor/dsmr/state",
+            "value_template":"{{ value_json.actual | is_defined }}",
+            "unit_of_meas":"W",
+            "device_class":"energy",
+            "device":{"name":"dsmr","model":"smartmeter","manufacturer":"Kaifa","identifiers":["A4C138C38EE5"]}}
+client.publish(topic, json.dumps(payload))
+
+time.sleep(10)
+
+topic = "homeassistant/sensor/dsmr/prod/config"
+payload = {"name":"prod",
+            "unique_id":"prod",
+            "state_topic": "homeassistant/sensor/dsmr/state",
+            "value_template":"{{ value_json.prod | is_defined }}",
+            "unit_of_meas":"kWh",
+            "device_class":"energy",
+            "device":{"name":"dsmr","model":"smartmeter","manufacturer":"Kaifa","identifiers":["A4C138C38EE5"]}}
+client.publish(topic, json.dumps(payload))
+time.sleep(10)
+
+topic = "homeassistant/sensor/dsmr/cons/config"
+payload = { "name":"cons",
+            "unique_id":"cons",
+            "state_topic": "homeassistant/sensor/dsmr/state",
+            "value_template":"{{ value_json.cons | is_defined }}",
+            "unit_of_meas":"kWh",
+            "device_class":"energy",
+            "device":{"name":"dsmr","model":"smartmeter","manufacturer":"Kaifa","identifiers":["A4C138C38EE5"]}}
+client.publish(topic, json.dumps(payload))
+
+time.sleep(10)
+topic = "homeassistant/sensor/dsmr/state"
+data = {"actual":actprod-actcons,"cons":consumption, "prod":production}
+client.publish(topic, json.dumps(data))
+
+
+#time.sleep(1)
+
+#client.publish("homeassistant/sensor/dsmr/config", '{"name": "dsmr", "device_class": "sensor", "state_topic": "homeassistant/binary_sensor/dsmr/state"}')
+#client.publish("homeassistant/sensor/dsmr/actual", actprod-actcons)
+#client.publish("homeassistant/sensor/dsmr/cons", consumption)
+#client.publish("homeassistant/sensor/dsmr/prod", production)
 time.sleep(1)
 syslog.syslog('Completed succesfully')
