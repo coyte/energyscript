@@ -12,15 +12,13 @@ import time
 import paho.mqtt.client as paho
 import struct
 import os
+import json
+
 
 progname = "omnik2mqtt.py"
 version = "v0.01"
 
-debug = 1
-# add all your inverters below, script will cycle through them and add retrieved values
-inverter = [(os.environ.get('INVERTER1')), (os.environ.get('INVERTER2'))]
-if debug:
-    print(inverter)
+debug = 0
 
 port = 8899  # default port for inverter
 
@@ -239,13 +237,17 @@ def generate_string(serial_no):
     Returns:
         str: Information request string for inverter
     """
+    if debug:
+        print("The variable serial_no is of type:", type(serial_no))
+        print("The variable serial_no has value: ", serial_no)
+
     response = '\x68\x02\x40\x30'
 
     double_hex = hex(serial_no)[2:] * 2
     if debug:
         print(double_hex)
     hex_list = [double_hex[i:i + 2].decode('hex')
-                for i in reversed(range(0, len(double_hex), 2))]
+                    for i in reversed(range(0, len(double_hex), 2))]
     cs_count = 115 + sum([ord(c) for c in hex_list])
     checksum = hex(cs_count)[-2:].decode('hex')
     response += ''.join(hex_list) + '\x01\x00' + checksum + '\x16'
@@ -257,44 +259,92 @@ def generate_string(serial_no):
 power = 0
 e_total = 0
 e_today = 0
-exit(0)
+
 # Loop over inverters
-for tup in inverter:
-    #    print(tup)
-    ip, sn = tup
-    if debug:
-        print(ip)
-        print(sn)
-    # Connect to inverter
-    for res in socket.getaddrinfo(ip, port, socket.AF_INET, socket.SOCK_STREAM):
-        family, socktype, proto, canonname, sockadress = res
-        try:
-            inverter_socket = socket.socket(family, socktype, proto)
-            inverter_socket.settimeout(10)
-            inverter_socket.connect(sockadress)
-        except socket.error as msg:
-            self.logger.error('Could not open socket')
-            self.logger.error(msg)
-            sys.exit(1)
+for name, value in os.environ.items():
+    if "INVERTER" in name:
+        inverter = value.split(',')
+        if debug:
+            print('Inverter IP: ',inverter[0])
+            print('Inverter SN: ', inverter[1])
+        ip = inverter[0]
+        sn = int(inverter[1].strip())
+        if debug:
+            print("The variable sn is of type:", type(sn))
+            print("The variable sn has value: "+ str(sn))
 
-        inverter_socket.sendall(generate_string(sn))
-        data = inverter_socket.recv(1024)
-        inverter_socket.close()
-        msg = InverterMsg(data)
+        for res in socket.getaddrinfo(ip, port, socket.AF_INET, socket.SOCK_STREAM):
+            family, socktype, proto, canonname, sockadress = res
+            try:
+                inverter_socket = socket.socket(family, socktype, proto)
+                inverter_socket.settimeout(10)
+                inverter_socket.connect(sockadress)
+            except socket.error as msg:
+                self.logger.error('Could not open socket')
+                self.logger.error(msg)
+                sys.exit(1)
 
-        power = power + msg.power
-        e_total = e_total + msg.e_total
-        e_today = e_today + msg.e_today
+            inverter_socket.sendall(generate_string(sn))
+
+            data = inverter_socket.recv(1024)
+            inverter_socket.close()
+            msg = InverterMsg(data)
+
+            power = power + msg.power
+            e_total = e_total + msg.e_total
+            e_today = e_today + msg.e_today
 # =======End Reading from inverters=================================================
 print("Total actual power: " + str(power))
 print("Total yield: " + str(e_total))
 print("Yield today: " + str(e_today))
 
+######################################
+# MQTT PUBLISH
+######################################
+if debug:
+    print("Publishing....")
 
-# Post update to MQTT
-#client.publish("homeassistant/binary_sensor/pv/config", '{"name": "pv", "device_class": "sensor", "state_topic": "homeassistant/binary_sensor/pv/state"}')
-#client.publish("homeassistant/binary_sensor/pv/actual", power)
-#client.publish("homeassistant/binary_sensor/pv/total", e_total)
-#client.publish("homeassistant/binary_sensor/pv/today", e_today)
+topic = "homeassistant/sensor/pv/actual/config"
+payload = { "name":"power",
+            "unique_id":"power",
+            "state_topic": "homeassistant/sensor/pv/state",
+            "value_template":"{{ value_json.power | is_defined }}",
+            "unit_of_meas":"W",
+            "device_class":"energy",
+            "device":{"name":"pv","model":"combined","manufacturer":"Omnik","identifiers":["A4C138CEEEEE"]}}
+client.publish(topic, json.dumps(payload))
+
+time.sleep(10)
+
+topic = "homeassistant/sensor/pv/total/config"
+payload = {"name":"total",
+            "unique_id":"total",
+            "state_topic": "homeassistant/sensor/pv/state",
+            "value_template":"{{ value_json.total | is_defined }}",
+            "unit_of_meas":"kWh",
+            "device_class":"energy",
+            "device":{"name":"pv","model":"combined","manufacturer":"Omnik","identifiers":["A4C138CEEEEE"]}}
+client.publish(topic, json.dumps(payload))
+time.sleep(10)
+
+topic = "homeassistant/sensor/pv/today/config"
+payload = { "name":"today",
+            "unique_id":"today",
+            "state_topic": "homeassistant/sensor/pv/state",
+            "value_template":"{{ value_json.today | is_defined }}",
+            "unit_of_meas":"kWh",
+            "device_class":"energy",
+            "device":{"name":"pv","model":"combined","manufacturer":"Omnik","identifiers":["A4C138CEEEEE"]}}
+client.publish(topic, json.dumps(payload))
+
+time.sleep(10)
+
+topic = "homeassistant/sensor/pv/state"
+data = {"power":power,"total":e_total, "today":e_today}
+client.publish(topic, json.dumps(data))
+
+
 #time.sleep(1)
+
 syslog.syslog('Completed succesfully')
+
