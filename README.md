@@ -1,11 +1,12 @@
 # energyscript
 Scripts to read energy consumption and production.
-The scripts get data from Kaifa DSMR P1 gen4 meter, Kamstrup 403 mbus heat meter (script not ready) and Omnik PV inverters. They have not been tested with any other equipment. I expect the dsmr2mqtt sccript to work with other meters, as the P1 interface is well specified. The omnik inverters shared their IP interface with a number of other Chinese inverters, if you have a Chinese inverter give it a shot. Kamstrup 403 seem pretty common, I don't know if that goes for the Mbus data as well, if you have a other Kamstrup, good chance it will work, as for other brands, I don't know. 
 
-They publish a subset of the data to a homeassistant compatible MQTT,for any home automation to pick up and process.
-The formatting of the MQTT enables autodiscovery of devices with entities by HomeAssistant.
+The scripts get data from Kaifa DSMR P1 gen4 meter, Kamstrup 403 mbus heat meter (script not ready) and Omnik PV inverters. They have not been tested with any other equipment. I expect the dsmr script to work with other meters, as the P1 interface is well specified. The Omnik inverters shared their wifi interface with a number of other Chinese inverters. If you have a Chinese inverter, give it a shot. Kamstrup 403 seem pretty common. If you have a other Kamstrup, good chance it will work, as for other brands, I don't know. 
 
-![missing image](https://github.com/coyte/energyscript/blob/master/dsmr.png) ![missing image](https://github.com/coyte/energyscript/blob/master/pv.png)
+The scripts publish a subset of the data to a homeassistant compatible MQTT.
+The formatting of the MQTT enables autodiscovery of devices with entities by HomeAssistant. Other home automation solution can subribe to the topics as well.
+
+![missing image](https://github.com/coyte/energyscript/blob/master/images/dsmr.png) ![missing image](https://github.com/coyte/energyscript/blob/master/images/pv.png)
 
 
 
@@ -14,14 +15,14 @@ If you intend the to run the script through cron, copy this file and name it .en
 
 The dsmr2mqtt.py script assumes a cable to P1 port of the smart meter, a search for P1 cable on Ali will give you a good choice.
 
-![missing image](https://github.com/coyte/energyscript/blob/master/p1cable.png)
+![missing image](https://github.com/coyte/energyscript/blob/master/images/p1cable.png)
 
 
 The omnik2mqtt.py script assumes an IP address and serialnumber for each inverter, add them as INVERTERx variables to the .envvars or environment files. The script will cycle through the inverters and sum the power, daily and total energy values from the inverters before outputting them to MQTT.
 
 The heat2mqtt.py script assumes a USB to Mbus master module to be connected. Again look at Aliexpress to get one, price range EUR30-40
 
-![missing image](https://github.com/coyte/energyscript/blob/master/mbus.png)
+![missing image](https://github.com/coyte/energyscript/blob/master/images/mbus.png)
 
 
 There still are a few scripts that publish information to OpenHAB. I'm moving off OH and will not be maintaining them.
