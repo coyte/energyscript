@@ -13,9 +13,15 @@ If you intend the to run the script through cron, copy this file and name it .en
 
 The dsmr2mqtt.py script assumes a cable to P1 port of the smart meter, a search for P1 cable on Ali will give you a good choice.
 
+![missing image](https://github.com/coyte/energyscript/blob/master/p1cable.png)
+
+
 The omnik2mqtt.py script assumes an IP address and serialnumber for each inverter, add them as INVERTERx variables to the .envvars or environment files. The script will cycle through the inverters and sum the power, daily and total energy values from the inverters before outputting them to MQTT.
 
 The heat2mqtt.py script assumes a USB to Mbus master module to be connected. Again look at Aliexpress to get one, price range EUR30-40
+
+![missing image](https://github.com/coyte/energyscript/blob/master/mbus.png)
+
 
 There still are a few scripts that publish information to OpenHAB. I'm moving off OH and will not be maintaining them.
 
