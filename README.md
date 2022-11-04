@@ -1,6 +1,7 @@
 # energyscript
 Scripts to read energy consumption and production.
-The scripts get data from dsmr P1 gen4 meter, Kamstrup 403 mbus heat meter (script not ready) and Omnik PV inverters.
+The scripts get data from Kaifa DSMR P1 gen4 meter, Kamstrup 403 mbus heat meter (script not ready) and Omnik PV inverters. They have not been tested with any other equipment. I expect the dsmr2mqtt sccript to work with other meters, as the P1 interface is well specified. The omnik inverters shared their IP interface with a number of other Chinese inverters, if you have a Chinese inverter give it a shot. Kamstrup 403 seem pretty common, I don't know if that goes for the Mbus data as well, if you have a other Kamstrup, good chance it will work, as for other brands, I don't know. 
+
 They publish a subset of the data to a homeassistant compatible MQTT,for any home automation to pick up and process.
 The formatting of the MQTT enables autodiscovery of devices with entities by HomeAssistant.
 
