@@ -19,7 +19,8 @@ def on_publish(client, userdata, result):  # create function for callback
 
 
 debug = 0
-comport = "/dev/serial/by-id/usb-FTDI_P1_Converter_Cable_P1XZ6U1M-if00-port0"
+comport = os.environ.get('DSMRPORT')
+#comport = "/dev/serial/by-id/usb-FTDI_P1_Converter_Cable_P1XZ6U1M-if00-port0"
 
 
 client = paho.Client()

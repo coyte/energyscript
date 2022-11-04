@@ -12,3 +12,6 @@ export OPENHABPORT=1234
 export INVERTER1="1.2.3.4, 1234567899"
 export INVERTER2="1.2.3.5, 1234567899"
 export INVERTER3="1.2.3.6, 1234567899"
+
+export DSMRPORT="/dev/serial/by-id/usb-FTDI_P1_Converter_Cable_P1XZ6U1M-if00-port0"
+export MBUSPORT="/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A10LLX2Z-if00-port0"
