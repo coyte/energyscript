@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
-# Python script om P1 telegram weer te geven in MQTT
+# Python script to read heat meter (Kamstrup 403) and push data to MQTT
 # paho needs to be installed (pip3 install paho-mqtt)
+# meterbus needs to be installed (pip3 install pyMeterBus)
 # user needs to be member of dialout group (usermod -a -G dialout LOGINNAME)
+# run it like;
+# . /home/niels/energyscript/.envvars && python3 /home/niels/energyscript/heat2mqtt.py
 
-import serial
-import paho.mqtt.client as paho
-import time
-import syslog
-import os
-import json
+
+import serial #to connect to Mbus device over USB
+import paho.mqtt.client as paho # For MQTT interaction
+import time # for sleep function
+import syslog # for logging in syslog
+import os # read env variables
+import json # formatting data
+import meterbus # interact with mbus device
 
 progname = "heat2mqtt.py"
 version = "v0.01"
@@ -125,9 +130,8 @@ payload = { "name":"actual",
             "unit_of_meas":"W",
             "device_class":"energy",
             "device":{"name":"dsmr","model":"smartmeter","manufacturer":"Kaifa","identifiers":["A4C138C38EE5"]}}
-client.publish(topic, json.dumps(payload))
-
-time.sleep(10)
+#client.publish(topic, json.dumps(payload))
+#time.sleep(10)
 
 topic = "homeassistant/sensor/dsmr/prod/config"
 payload = {"name":"prod",
@@ -137,8 +141,8 @@ payload = {"name":"prod",
             "unit_of_meas":"kWh",
             "device_class":"energy",
             "device":{"name":"dsmr","model":"smartmeter","manufacturer":"Kaifa","identifiers":["A4C138C38EE5"]}}
-client.publish(topic, json.dumps(payload))
-time.sleep(10)
+#client.publish(topic, json.dumps(payload))
+#time.sleep(10)
 
 topic = "homeassistant/sensor/dsmr/cons/config"
 payload = { "name":"cons",
@@ -148,12 +152,12 @@ payload = { "name":"cons",
             "unit_of_meas":"kWh",
             "device_class":"energy",
             "device":{"name":"dsmr","model":"smartmeter","manufacturer":"Kaifa","identifiers":["A4C138C38EE5"]}}
-client.publish(topic, json.dumps(payload))
+#client.publish(topic, json.dumps(payload))
+#time.sleep(10)
 
-time.sleep(10)
 topic = "homeassistant/sensor/dsmr/state"
 data = {"actual":actprod-actcons,"cons":consumption, "prod":production}
-client.publish(topic, json.dumps(data))
+#client.publish(topic, json.dumps(data))
 
 
 #time.sleep(1)
@@ -162,5 +166,5 @@ client.publish(topic, json.dumps(data))
 #client.publish("homeassistant/sensor/dsmr/actual", actprod-actcons)
 #client.publish("homeassistant/sensor/dsmr/cons", consumption)
 #client.publish("homeassistant/sensor/dsmr/prod", production)
-time.sleep(1)
+#time.sleep(1)
 syslog.syslog('Completed succesfully')
