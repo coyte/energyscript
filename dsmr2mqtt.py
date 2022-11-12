@@ -128,7 +128,8 @@ payload = { "name":"actual",
             "state_topic": "homeassistant/sensor/dsmr/state",
             "value_template":"{{ value_json.actual | is_defined }}",
             "unit_of_meas":"W",
-            "device_class":"energy",
+            "device_class":"power",
+            "state_class":"measurement",
             "device":{"name":"dsmr","model":"smartmeter","manufacturer":"Kaifa","identifiers":["A4C138C38EE5"]}}
 client.publish(topic, json.dumps(payload))
 
@@ -141,6 +142,7 @@ payload = {"name":"prod",
             "value_template":"{{ value_json.prod | is_defined }}",
             "unit_of_meas":"kWh",
             "device_class":"energy",
+            "state_class":"total",
             "device":{"name":"dsmr","model":"smartmeter","manufacturer":"Kaifa","identifiers":["A4C138C38EE5"]}}
 client.publish(topic, json.dumps(payload))
 time.sleep(10)
@@ -152,12 +154,13 @@ payload = { "name":"cons",
             "value_template":"{{ value_json.cons | is_defined }}",
             "unit_of_meas":"kWh",
             "device_class":"energy",
+            "state_class":"total",
             "device":{"name":"dsmr","model":"smartmeter","manufacturer":"Kaifa","identifiers":["A4C138C38EE5"]}}
 client.publish(topic, json.dumps(payload))
 
 time.sleep(10)
 topic = "homeassistant/sensor/dsmr/state"
-data = {"actual":actprod-actcons,"cons":consumption, "prod":production}
+data = {"actual":round(actprod-actcons,2),"cons":consumption, "prod":production}
 client.publish(topic, json.dumps(data))
 
 

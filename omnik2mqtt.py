@@ -311,6 +311,7 @@ payload = { "name":"power",
             "value_template":"{{ value_json.power | is_defined }}",
             "unit_of_meas":"W",
             "device_class":"energy",
+            "state_class":"power",
             "device":{"name":"pv","model":"combined","manufacturer":"Omnik","identifiers":["A4C138CEEEEE"]}}
 client.publish(topic, json.dumps(payload))
 
@@ -323,6 +324,7 @@ payload = {"name":"total",
             "value_template":"{{ value_json.total | is_defined }}",
             "unit_of_meas":"kWh",
             "device_class":"energy",
+            "state_class":"total",
             "device":{"name":"pv","model":"combined","manufacturer":"Omnik","identifiers":["A4C138CEEEEE"]}}
 client.publish(topic, json.dumps(payload))
 time.sleep(10)
@@ -334,13 +336,14 @@ payload = { "name":"today",
             "value_template":"{{ value_json.today | is_defined }}",
             "unit_of_meas":"kWh",
             "device_class":"energy",
+            "state_class":"total",
             "device":{"name":"pv","model":"combined","manufacturer":"Omnik","identifiers":["A4C138CEEEEE"]}}
 client.publish(topic, json.dumps(payload))
 
 time.sleep(10)
 
 topic = "homeassistant/sensor/pv/state"
-data = {"power":power,"total":e_total, "today":e_today}
+data = {"power":round(power,2),"total":round(e_total,2), "today":round(e_today,2)}
 client.publish(topic, json.dumps(data))
 
 
