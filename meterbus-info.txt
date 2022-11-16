@@ -48,6 +48,23 @@ Volgende stap is het zichtbaar maken van deze data in Domoticz / InfluxDB / Graf
 Wie wil dit nog eens eenvoudig aan mij uitleggen?
 Alvast bedankt!
 
+Niels:
+mbus-serial-scan -b 2400 /dev/ttyUSB0
+mbus-serial-scan -b 2400 /dev/ttyUSB0
+Found a M-Bus device at address 1
+
+
+
+mbus-serial-request-data -b 2400 /dev/ttyUSB0 1
+
+
+/dev/serial/by-id
+  lrwxrwxrwx 1 root root 13 Nov 15 15:59 usb-FTDI_FT232R_USB_UART_A10LLX2Z-if00-port0 -> ../../ttyUSB0
+  lrwxrwxrwx 1 root root 13 Sep  9 20:47 usb-FTDI_P1_Converter_Cable_P1XZ6U1M-if00-port0 -> ../../ttyUSB1
+
+
+
+
 
 
 

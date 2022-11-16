@@ -31,7 +31,7 @@ client.connect(os.environ.get('MQTTBROKER'), int(os.environ.get('MQTTPORT')))
 ##############################################################################
 # Main program
 ##############################################################################
-syslog.syslog('dsmr2mqtt started')
+syslog.syslog('Started')
 if debug:
     print("Dutch Smart Meter P1 reader",  version)
 if debug:
@@ -51,8 +51,8 @@ ser.port = comport
 try:
     ser.open()
 except:
-    sys.exit("Error opening COM port: %s. Aborting." % ser.name)
-
+    syslog.syslog("Error opening COM port: %s. Aborting." % ser.name)
+    sys.exit(1)
 
 # Cycle through the read lines of the P1 telegram
 for lineread in range(0, 23):
@@ -98,7 +98,8 @@ for lineread in range(0, 23):
 try:
     ser.close()
 except:
-    sys.exit("Cannot close serial port %s. Aborting" % ser.name)
+    syslog.syslog("Cannot close serial port: %s. Aborting." % ser.name)
+    sys.exit(1)
 
 consumption = round(t1consumption+t2consumption, 2)
 production = round(t1production+t2production, 2)
@@ -121,7 +122,7 @@ if debug:
 ######################################
 if debug:
     print("Publishing....")
-
+syslog.syslog("Publishing results ...")
 topic = "homeassistant/sensor/dsmr/actual/config"
 payload = { "name":"actual",
             "unique_id":"actual",
@@ -136,7 +137,7 @@ client.publish(topic, json.dumps(payload))
 time.sleep(10)
 
 topic = "homeassistant/sensor/dsmr/prod/config"
-payload = {"name":"prod",
+payload = {"name":"productie",
             "unique_id":"prod",
             "state_topic": "homeassistant/sensor/dsmr/state",
             "value_template":"{{ value_json.prod | is_defined }}",
@@ -148,7 +149,7 @@ client.publish(topic, json.dumps(payload))
 time.sleep(10)
 
 topic = "homeassistant/sensor/dsmr/cons/config"
-payload = { "name":"cons",
+payload = { "name":"verbruik",
             "unique_id":"cons",
             "state_topic": "homeassistant/sensor/dsmr/state",
             "value_template":"{{ value_json.cons | is_defined }}",

@@ -21,7 +21,7 @@ version = "v0.01"
 debug = 0
 
 port = 8899  # default port for inverter
-
+syslog.syslog('Started')
 
 def on_publish(client, userdata, result):  # create function for callback
     print("data published \n")
@@ -280,8 +280,10 @@ for name, value in os.environ.items():
                 inverter_socket.settimeout(10)
                 inverter_socket.connect(sockadress)
             except socket.error as msg:
-                self.logger.error('Could not open socket')
-                self.logger.error(msg)
+                syslog.syslog('Could not open socket')
+                syslog.syslog(msg)
+#                self.logger.error('Could not open socket:')
+#                self.logger.error(msg)
                 sys.exit(1)
 
             inverter_socket.sendall(generate_string(sn))
@@ -301,8 +303,7 @@ print("Yield today: " + str(e_today))
 ######################################
 # MQTT PUBLISH
 ######################################
-if debug:
-    print("Publishing....")
+syslog.syslog('Publishing')
 
 topic = "homeassistant/sensor/pv/actual/config"
 payload = { "name":"power",
